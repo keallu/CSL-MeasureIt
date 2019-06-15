@@ -3,32 +3,48 @@ using UnityEngine;
 
 namespace MeasureIt
 {
-    public class ToggleProperties
+    public class MeasureProperties
     {
-        public float PanelDefaultPositionX;
-        public float PanelDefaultPositionY;
+        public float ControlPanelDefaultPositionX;
+        public float ControlPanelDefaultPositionY;
+        public float InfoPanelDefaultPositionX;
+        public float InfoPanelDefaultPositionY;
 
-        private static ToggleProperties instance;
+        private static MeasureProperties instance;
 
-        public static ToggleProperties Instance
+        public static MeasureProperties Instance
         {
             get
             {
-                return instance ?? (instance = new ToggleProperties());
+                return instance ?? (instance = new MeasureProperties());
             }
         }
 
-        public void ResetPanelPosition()
+        public void ResetControlPanelPosition()
         {
             try
             {
-                ModConfig.Instance.PositionX = PanelDefaultPositionX;
-                ModConfig.Instance.PositionY = PanelDefaultPositionY;
+                ModConfig.Instance.ControlPanelPositionX = ControlPanelDefaultPositionX;
+                ModConfig.Instance.ControlPanelPositionY = ControlPanelDefaultPositionY;
                 ModConfig.Instance.Save();
             }
             catch (Exception e)
             {
-                Debug.Log("[Measure It!] MeasureProperties:ResetPanelPosition -> Exception: " + e.Message);
+                Debug.Log("[Measure It!] MeasureProperties:ResetControlPanelPosition -> Exception: " + e.Message);
+            }
+        }
+
+        public void ResetInfoPanelPosition()
+        {
+            try
+            {
+                ModConfig.Instance.InfoPanelPositionX = InfoPanelDefaultPositionX;
+                ModConfig.Instance.InfoPanelPositionY = InfoPanelDefaultPositionY;
+                ModConfig.Instance.Save();
+            }
+            catch (Exception e)
+            {
+                Debug.Log("[Measure It!] MeasureProperties:ResetInfoPanelPosition -> Exception: " + e.Message);
             }
         }
     }

@@ -4,10 +4,15 @@
     public class ModConfig
     {
         public bool ConfigUpdated { get; set; }
-        public bool ShowMeasurePanel { get; set; } = true;
-        public float PositionX { get; set; }
-        public float PositionY { get; set; }
+        public bool ShowControlPanel { get; set; } = true;
+        public float ControlPanelPositionX { get; set; }
+        public float ControlPanelPositionY { get; set; }
         public int Cells { get; set; } = 4;
+        public bool ShowInfoPanel { get; set; } = true;
+        public float InfoPanelPositionX { get; set; }
+        public float InfoPanelPositionY { get; set; }
+        public int UnitOfLength { get; set; } = 1;
+        public int UnitOfSlope { get; set; } = 1;
 
         private static ModConfig instance;
 

@@ -21,25 +21,84 @@ namespace MeasureIt
             harmony.UnpatchAll();
         }
 
+        public static readonly string[] UnitOfLengthLabels =
+        {
+            "Unit",
+            "Metre",
+            "Yard",
+            "Foot"
+        };
+
+        public static readonly int[] UnitOfLengthValues =
+        {
+            0,
+            1,
+            2,
+            3
+        };
+
+        public static readonly string[] UnitOfSlopeLabels =
+        {
+            "Degree",
+            "Percentage"
+        };
+
+        public static readonly int[] UnitOfSlopeValues =
+        {
+            0,
+            1
+        };
+
         public void OnSettingsUI(UIHelperBase helper)
         {
             UIHelperBase group;
             bool selected;
+            int selectedValue;
 
             group = helper.AddGroup(Name);
 
-            selected = ModConfig.Instance.ShowMeasurePanel;
-            group.AddCheckbox("Show Measure Panel", selected, sel =>
+            selected = ModConfig.Instance.ShowControlPanel;
+            group.AddCheckbox("Show Control Panel", selected, sel =>
             {
-                ModConfig.Instance.ShowMeasurePanel = sel;
+                ModConfig.Instance.ShowControlPanel = sel;
                 ModConfig.Instance.Save();
             });
 
             group.AddSpace(10);
 
-            group.AddButton("Reset Positioning of Measure Panel", () =>
+            group.AddButton("Reset Positioning of Control Panel", () =>
             {
-                ToggleProperties.Instance.ResetPanelPosition();
+                MeasureProperties.Instance.ResetControlPanelPosition();
+            });
+
+            group = helper.AddGroup("Additional Measurements");
+
+            selected = ModConfig.Instance.ShowInfoPanel;
+            group.AddCheckbox("Show Info Panel", selected, sel =>
+            {
+                ModConfig.Instance.ShowInfoPanel = sel;
+                ModConfig.Instance.Save();
+            });
+
+            selectedValue = ModConfig.Instance.UnitOfLength;
+            group.AddDropdown("Unit of Length", UnitOfLengthLabels, selectedValue, sel =>
+            {
+                ModConfig.Instance.UnitOfLength = UnitOfLengthValues[sel];
+                ModConfig.Instance.Save();
+            });
+
+            selectedValue = ModConfig.Instance.UnitOfSlope;
+            group.AddDropdown("Unit of Slope", UnitOfSlopeLabels, selectedValue, sel =>
+            {
+                ModConfig.Instance.UnitOfSlope = UnitOfSlopeValues[sel];
+                ModConfig.Instance.Save();
+            });
+
+            group.AddSpace(10);
+
+            group.AddButton("Reset Positioning of Info Panel", () =>
+            {
+                MeasureProperties.Instance.ResetInfoPanelPosition();
             });
         }
     }

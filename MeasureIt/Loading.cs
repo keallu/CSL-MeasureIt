@@ -13,7 +13,7 @@ namespace MeasureIt
             try
             {
                 _measureManagerGameObject = new GameObject("MeasureItMeasureManager");
-                _measureManagerGameObject.AddComponent<ToggleManager>();
+                _measureManagerGameObject.AddComponent<MeasureManager>();
             }
             catch (Exception e)
             {

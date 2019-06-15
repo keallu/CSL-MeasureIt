@@ -58,6 +58,7 @@
   <ItemGroup>
     <Compile Include="Configuration.cs" />
     <Compile Include="Loading.cs" />
+    <Compile Include="MeasureInfo.cs" />
     <Compile Include="MeasureManager.cs" />
     <Compile Include="MeasureProperties.cs" />
     <Compile Include="ModConfig.cs" />

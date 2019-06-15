@@ -30,6 +30,15 @@ namespace MeasureIt
             return dragHandle;
         }
 
+        public static UILabel CreateLabel(UIComponent parent, string name, string text)
+        {
+            UILabel label = parent.AddUIComponent<UILabel>();
+            label.name = name;
+            label.text = text;
+
+            return label;
+        }
+
         public static UIButton CreateButton(UIComponent parent, string name, string text)
         {
             UIButton button = parent.AddUIComponent<UIButton>();

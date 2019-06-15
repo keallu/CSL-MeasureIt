@@ -11,7 +11,10 @@ namespace MeasureIt
         {
             try
             {
-                radius = radius - 32f + (32f * 0.25f * ModConfig.Instance.Cells);
+                if (radius > 0f)
+                {
+                    radius = radius - 32f + (32f * 0.25f * ModConfig.Instance.Cells);
+                }
             }
             catch (Exception e)
             {
