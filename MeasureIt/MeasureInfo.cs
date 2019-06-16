@@ -12,6 +12,7 @@ namespace MeasureIt
         public float Relief;
         public float Distance;
         public float Slope;
+        public float Direction;
 
         private TerrainManager _terrainManager;
 
@@ -44,7 +45,7 @@ namespace MeasureIt
 
                 _netTool = netTool;
                 _controlPointCountField = netTool.GetType().GetField("m_controlPointCount", BindingFlags.NonPublic | BindingFlags.Instance);
-                _controlPointsField = netTool.GetType().GetField("m_controlPoints", BindingFlags.NonPublic | BindingFlags.Instance);                
+                _controlPointsField = netTool.GetType().GetField("m_controlPoints", BindingFlags.NonPublic | BindingFlags.Instance);
             }
             catch (Exception e)
             {
@@ -79,8 +80,9 @@ namespace MeasureIt
 
                 Elevation = _startHeight - _terrainManager.WaterSimulation.m_currentSeaLevel;
                 Relief = _controlPointCount > 0 ? _endHeight - _startHeight : 0f;
-                Distance = _controlPointCount > 0 ? VectorUtils.LengthXZ(_startPosition - _endPosition) : 0f;
+                Distance = _controlPointCount > 0 ? VectorUtils.LengthXZ(_endPosition - _startPosition) : 0f;
                 Slope = _controlPointCount > 0 ? (Distance > 0f ? Relief / Distance : 0f) : 0f;
+                Direction = _controlPointCount > 0 ? Angle(Vector3.down, VectorUtils.XZ(_endPosition - _startPosition)) : 0f;
 
                 _controlPointCount = controlPointCount;
             }
@@ -88,6 +90,19 @@ namespace MeasureIt
             {
                 Debug.Log("[Measure It!] MeasureInfo:Update -> Exception: " + e.Message);
             }
+        }
+
+        private float Angle(Vector3 from, Vector3 to)
+        {
+            float angle = Vector3.Angle(from, to);
+            Vector3 cross = Vector3.Cross(from, to);
+
+            if (cross.z > 0)
+            {
+                angle = 360 - angle;
+            }
+
+            return angle;
         }
     }
 }

@@ -13,6 +13,7 @@
         public float InfoPanelPositionY { get; set; }
         public int UnitOfLength { get; set; } = 1;
         public int UnitOfSlope { get; set; } = 1;
+        public int UnitOfDirection { get; set; } = 1;
 
         private static ModConfig instance;
 

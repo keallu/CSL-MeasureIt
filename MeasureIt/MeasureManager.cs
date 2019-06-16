@@ -22,6 +22,8 @@ namespace MeasureIt
         private UILabel[] _infoTagLabels;
         private UILabel[] _infoValueLabels;
 
+        private readonly string[] CARDINALS = { "N", "NE", "E", "SE", "S", "SW", "W", "NW", "N" };
+
         public void Awake()
         {
             try
@@ -76,8 +78,8 @@ namespace MeasureIt
 
                 _controlButtons = new UIButton[4];
 
-                _infoTagLabels = new UILabel[4];
-                _infoValueLabels = new UILabel[4];
+                _infoTagLabels = new UILabel[5];
+                _infoValueLabels = new UILabel[5];
 
                 CreateUI();
             }
@@ -221,7 +223,7 @@ namespace MeasureIt
                 _infoPanel = UIUtils.CreatePanel("MeasureItInfoPanel");
                 _infoPanel.zOrder = 0;
                 _infoPanel.backgroundSprite = "SubcategoriesPanel";
-                _infoPanel.size = new Vector2(190f, 110f);
+                _infoPanel.size = new Vector2(190f, 120f);
                 _infoPanel.isVisible = false;
 
                 _infoDragHandle = UIUtils.CreateDragHandle(_infoPanel, "InfoDragHandle");
@@ -239,7 +241,7 @@ namespace MeasureIt
                 _infoInnerPanel.size = new Vector2(_infoInnerPanel.parent.width - 16f, _infoInnerPanel.parent.height - 16f);
                 _infoInnerPanel.relativePosition = new Vector3(8f, 8f);
 
-                for (int i = 0; i < 4; i++)
+                for (int i = 0; i < 5; i++)
                 {
                     _infoTagLabels[i] = UIUtils.CreateLabel(_infoInnerPanel, "InfoTagLabel" + i, "");
                     _infoTagLabels[i].textScale = 0.625f;
@@ -270,7 +272,7 @@ namespace MeasureIt
                 _infoPanel.absolutePosition = new Vector3(ModConfig.Instance.InfoPanelPositionX, ModConfig.Instance.InfoPanelPositionY);
                 _infoPanel.isVisible = ModConfig.Instance.ShowInfoPanel;
 
-                for (int i = 0; i < 4; i++)
+                for (int i = 0; i < 5; i++)
                 {
                     switch (i)
                     {
@@ -289,6 +291,10 @@ namespace MeasureIt
                         case 3:
                             _infoTagLabels[i].text = "Slope (" + GetUnitOfSlopeSymbol(ModConfig.Instance.UnitOfSlope) + ")";
                             _infoTagLabels[i].tooltip = "Slope is the average incline between start and end point.";
+                            break;
+                        case 4:
+                            _infoTagLabels[i].text = "Direction (" + GetUnitOfDirectionSymbol(ModConfig.Instance.UnitOfDirection) + ")";
+                            _infoTagLabels[i].tooltip = "Direction is the cartographic orientation between start and end point.";
                             break;
                         default:
                             break;
@@ -327,21 +333,24 @@ namespace MeasureIt
         {
             try
             {
-                for (int i = 0; i < 4; i++)
+                for (int i = 0; i < 5; i++)
                 {
                     switch (i)
                     {
                         case 0:
-                            _infoValueLabels[i].text = $"{ConvertLength(ModConfig.Instance.UnitOfLength, MeasureInfo.Instance.Elevation):0.##}";
+                            _infoValueLabels[i].text = DisplayLength(ModConfig.Instance.UnitOfLength, MeasureInfo.Instance.Elevation);
                             break;
                         case 1:
-                            _infoValueLabels[i].text = $"{ConvertLength(ModConfig.Instance.UnitOfLength, MeasureInfo.Instance.Relief):0.##}";
+                            _infoValueLabels[i].text = DisplayLength(ModConfig.Instance.UnitOfLength, MeasureInfo.Instance.Relief);
                             break;
                         case 2:
-                            _infoValueLabels[i].text = $"{ConvertLength(ModConfig.Instance.UnitOfLength, MeasureInfo.Instance.Distance):0.##}";
+                            _infoValueLabels[i].text = DisplayLength(ModConfig.Instance.UnitOfLength, MeasureInfo.Instance.Distance);
                             break;
                         case 3:
-                            _infoValueLabels[i].text = $"{ConvertSlope(ModConfig.Instance.UnitOfSlope, MeasureInfo.Instance.Slope):0.##}";
+                            _infoValueLabels[i].text = DisplaySlope(ModConfig.Instance.UnitOfSlope, MeasureInfo.Instance.Slope);
+                            break;
+                        case 4:
+                            _infoValueLabels[i].text = DisplayDirection(ModConfig.Instance.UnitOfDirection, MeasureInfo.Instance.Direction);
                             break;
                         default:
                             break;
@@ -369,7 +378,7 @@ namespace MeasureIt
                     case 3:
                         return "ft";
                     default:
-                        return "u";
+                        return "?";
                 }
             }
             catch (Exception e)
@@ -390,12 +399,33 @@ namespace MeasureIt
                     case 1:
                         return "%";
                     default:
-                        return "°";
+                        return "?";
                 }
             }
             catch (Exception e)
             {
                 Debug.Log("[Measure It!] MeasureManager:GetUnitOfSlopeSymbol -> Exception: " + e.Message);
+                return string.Empty;
+            }
+        }
+
+        private string GetUnitOfDirectionSymbol(int unitOfDirection)
+        {
+            try
+            {
+                switch (unitOfDirection)
+                {
+                    case 0:
+                        return "°";
+                    case 1:
+                        return "°";
+                    default:
+                        return "?";
+                }
+            }
+            catch (Exception e)
+            {
+                Debug.Log("[Measure It!] MeasureManager:GetUnitOfDirectionSymbol -> Exception: " + e.Message);
                 return string.Empty;
             }
         }
@@ -425,6 +455,19 @@ namespace MeasureIt
             }
         }
 
+        private string DisplayLength(int unitOfLength, float length)
+        {
+            try
+            {
+                return $"{ConvertLength(unitOfLength, length):0.##}";
+            }
+            catch (Exception e)
+            {
+                Debug.Log("[Measure It!] MeasureManager:DisplayLength -> Exception: " + e.Message);
+                return string.Empty;
+            }
+        }
+
         private float ConvertSlope(int unitOfSlope, float slope)
         {
             try
@@ -443,6 +486,40 @@ namespace MeasureIt
             {
                 Debug.Log("[Measure It!] MeasureManager:ConvertSlope -> Exception: " + e.Message);
                 return 0f;
+            }
+        }
+
+        private string DisplaySlope(int unitOfSlope, float slope)
+        {
+            try
+            {
+                return $"{ConvertSlope(unitOfSlope, slope):0.##}";
+            }
+            catch (Exception e)
+            {
+                Debug.Log("[Measure It!] MeasureManager:DisplaySlope -> Exception: " + e.Message);
+                return string.Empty;
+            }
+        }
+
+        private string DisplayDirection(int unitOfDirection, float direction)
+        {
+            try
+            {
+                switch (unitOfDirection)
+                {
+                    case 0:
+                        return $"{direction:0.##}";
+                    case 1:
+                        return CARDINALS[(int)Math.Round(direction % 360 / 45)];
+                    default:
+                        return $"{direction:0.##}";
+                }
+            }
+            catch (Exception e)
+            {
+                Debug.Log("[Measure It!] MeasureManager:DisplayDirection -> Exception: " + e.Message);
+                return string.Empty;
             }
         }
     }

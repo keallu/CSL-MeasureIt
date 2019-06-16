@@ -7,7 +7,7 @@ namespace MeasureIt
     public class ModInfo : IUserMod
     {
         public string Name => "Measure It!";
-        public string Description => "Allows to change the zone radius effect when placing roads.";
+        public string Description => "Helps with measures when placing roads.";
 
         public void OnEnabled()
         {
@@ -49,6 +49,18 @@ namespace MeasureIt
             1
         };
 
+        public static readonly string[] UnitOfDirectionLabels =
+        {
+            "Degree",
+            "Point"
+        };
+
+        public static readonly int[] UnitOfDirectionValues =
+        {
+            0,
+            1
+        };
+
         public void OnSettingsUI(UIHelperBase helper)
         {
             UIHelperBase group;
@@ -71,7 +83,7 @@ namespace MeasureIt
                 MeasureProperties.Instance.ResetControlPanelPosition();
             });
 
-            group = helper.AddGroup("Additional Measurements");
+            group = helper.AddGroup("Additional Measures");
 
             selected = ModConfig.Instance.ShowInfoPanel;
             group.AddCheckbox("Show Info Panel", selected, sel =>
@@ -91,6 +103,13 @@ namespace MeasureIt
             group.AddDropdown("Unit of Slope", UnitOfSlopeLabels, selectedValue, sel =>
             {
                 ModConfig.Instance.UnitOfSlope = UnitOfSlopeValues[sel];
+                ModConfig.Instance.Save();
+            });
+
+            selectedValue = ModConfig.Instance.UnitOfDirection;
+            group.AddDropdown("Unit of Direction", UnitOfDirectionLabels, selectedValue, sel =>
+            {
+                ModConfig.Instance.UnitOfDirection = UnitOfDirectionValues[sel];
                 ModConfig.Instance.Save();
             });
 
