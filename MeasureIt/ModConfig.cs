@@ -11,7 +11,7 @@
         public bool ShowInfoPanel { get; set; } = true;
         public float InfoPanelPositionX { get; set; }
         public float InfoPanelPositionY { get; set; }
-        public int UnitOfLength { get; set; } = 1;
+        public int UnitOfDistance { get; set; } = 1;
         public int UnitOfSlope { get; set; } = 1;
         public int UnitOfDirection { get; set; } = 1;
 

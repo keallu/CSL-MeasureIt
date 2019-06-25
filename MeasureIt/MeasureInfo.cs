@@ -10,6 +10,7 @@ namespace MeasureIt
     {
         public float Elevation;
         public float Relief;
+        public float Length;
         public float Distance;
         public float Slope;
         public float Direction;
@@ -23,6 +24,7 @@ namespace MeasureIt
         private int _controlPointCount;
         private NetTool.ControlPoint[] _controlPoints;
         private Vector3 _startPosition;
+        private Vector3 _bendPosition;
         private Vector3 _endPosition;
         private float _startHeight;
         private float _endHeight;
@@ -67,22 +69,29 @@ namespace MeasureIt
                 _startPosition = _controlPoints[0].m_position;
                 _startHeight = _terrainManager.SampleRawHeightSmooth(_controlPoints[0].m_position) + _controlPoints[0].m_elevation;
 
+                Elevation = _startHeight - _terrainManager.WaterSimulation.m_currentSeaLevel;
+
                 if (_controlPointCount == 1)
                 {
                     _endPosition = _controlPoints[1].m_position;
                     _endHeight = _terrainManager.SampleRawHeightSmooth(_controlPoints[1].m_position) + _controlPoints[1].m_elevation;
+                    Length = VectorUtils.LengthXZ(_endPosition - _startPosition); 
+                    Distance = Vector3.Distance(_endPosition, _startPosition);
+                    Direction = CalculateAngle(Vector3.down, VectorUtils.XZ(_endPosition - _startPosition));
                 }
                 else if (_controlPointCount == 2)
                 {
+                    _bendPosition = _controlPoints[1].m_position;
                     _endPosition = _controlPoints[2].m_position;
                     _endHeight = _terrainManager.SampleRawHeightSmooth(_controlPoints[2].m_position) + _controlPoints[2].m_elevation;
+                    NetSegment.CalculateMiddlePoints(_controlPoints[0].m_position, _controlPoints[0].m_direction, _controlPoints[2].m_position, _controlPoints[2].m_direction, false, false, out Vector3 middle1Position, out Vector3 middle2Position);
+                    Length = CalculateDistance(_startPosition, middle1Position, middle2Position, _endPosition);
+                    Distance = CalculateLength(_startPosition, middle1Position, middle2Position, _endPosition); 
+                    Direction = CalculateAngle(Vector3.down, VectorUtils.XZ(_endPosition - _bendPosition));
                 }
 
-                Elevation = _startHeight - _terrainManager.WaterSimulation.m_currentSeaLevel;
                 Relief = _controlPointCount > 0 ? _endHeight - _startHeight : 0f;
-                Distance = _controlPointCount > 0 ? VectorUtils.LengthXZ(_endPosition - _startPosition) : 0f;
-                Slope = _controlPointCount > 0 ? (Distance > 0f ? Relief / Distance : 0f) : 0f;
-                Direction = _controlPointCount > 0 ? Angle(Vector3.down, VectorUtils.XZ(_endPosition - _startPosition)) : 0f;
+                Slope = _controlPointCount > 0 ? (Length > 0f ? Relief / Length : 0f) : 0f;
 
                 _controlPointCount = controlPointCount;
             }
@@ -92,7 +101,29 @@ namespace MeasureIt
             }
         }
 
-        private float Angle(Vector3 from, Vector3 to)
+        private float CalculateLength(Vector3 start, Vector3 middle1, Vector3 middle2, Vector3 end)
+        {
+            float distance = 0f;
+
+            distance += VectorUtils.LengthXZ(middle1 - start);
+            distance += VectorUtils.LengthXZ(middle2 - middle1);
+            distance += VectorUtils.LengthXZ(end - middle2);
+
+            return distance;
+        }
+
+        private float CalculateDistance(Vector3 start, Vector3 middle1, Vector3 middle2, Vector3 end)
+        {
+            float length = 0f;
+
+            length += Vector3.Distance(start, middle1);
+            length += Vector3.Distance(middle1, middle2);
+            length += Vector3.Distance(middle2, end);
+
+            return length;
+        }
+
+        private float CalculateAngle(Vector3 from, Vector3 to)
         {
             float angle = Vector3.Angle(from, to);
             Vector3 cross = Vector3.Cross(from, to);

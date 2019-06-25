@@ -21,7 +21,7 @@ namespace MeasureIt
             harmony.UnpatchAll();
         }
 
-        public static readonly string[] UnitOfLengthLabels =
+        public static readonly string[] UnitOfDistanceLabels =
         {
             "Unit",
             "Metre",
@@ -29,7 +29,7 @@ namespace MeasureIt
             "Foot"
         };
 
-        public static readonly int[] UnitOfLengthValues =
+        public static readonly int[] UnitOfDistanceValues =
         {
             0,
             1,
@@ -92,10 +92,10 @@ namespace MeasureIt
                 ModConfig.Instance.Save();
             });
 
-            selectedValue = ModConfig.Instance.UnitOfLength;
-            group.AddDropdown("Unit of Length", UnitOfLengthLabels, selectedValue, sel =>
+            selectedValue = ModConfig.Instance.UnitOfDistance;
+            group.AddDropdown("Unit of Distance", UnitOfDistanceLabels, selectedValue, sel =>
             {
-                ModConfig.Instance.UnitOfLength = UnitOfLengthValues[sel];
+                ModConfig.Instance.UnitOfDistance = UnitOfDistanceValues[sel];
                 ModConfig.Instance.Save();
             });
 

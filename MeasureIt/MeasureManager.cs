@@ -78,8 +78,8 @@ namespace MeasureIt
 
                 _controlButtons = new UIButton[4];
 
-                _infoTagLabels = new UILabel[5];
-                _infoValueLabels = new UILabel[5];
+                _infoTagLabels = new UILabel[6];
+                _infoValueLabels = new UILabel[6];
 
                 CreateUI();
             }
@@ -223,7 +223,7 @@ namespace MeasureIt
                 _infoPanel = UIUtils.CreatePanel("MeasureItInfoPanel");
                 _infoPanel.zOrder = 0;
                 _infoPanel.backgroundSprite = "SubcategoriesPanel";
-                _infoPanel.size = new Vector2(190f, 120f);
+                _infoPanel.size = new Vector2(190f, 136f);
                 _infoPanel.isVisible = false;
 
                 _infoDragHandle = UIUtils.CreateDragHandle(_infoPanel, "InfoDragHandle");
@@ -241,7 +241,7 @@ namespace MeasureIt
                 _infoInnerPanel.size = new Vector2(_infoInnerPanel.parent.width - 16f, _infoInnerPanel.parent.height - 16f);
                 _infoInnerPanel.relativePosition = new Vector3(8f, 8f);
 
-                for (int i = 0; i < 5; i++)
+                for (int i = 0; i < 6; i++)
                 {
                     _infoTagLabels[i] = UIUtils.CreateLabel(_infoInnerPanel, "InfoTagLabel" + i, "");
                     _infoTagLabels[i].textScale = 0.625f;
@@ -272,29 +272,33 @@ namespace MeasureIt
                 _infoPanel.absolutePosition = new Vector3(ModConfig.Instance.InfoPanelPositionX, ModConfig.Instance.InfoPanelPositionY);
                 _infoPanel.isVisible = ModConfig.Instance.ShowInfoPanel;
 
-                for (int i = 0; i < 5; i++)
+                for (int i = 0; i < 6; i++)
                 {
                     switch (i)
                     {
                         case 0:
-                            _infoTagLabels[i].text = "Elevation (" + GetUnitOfLengthSymbol(ModConfig.Instance.UnitOfLength) + ")";
+                            _infoTagLabels[i].text = "Elevation (" + GetUnitOfDistanceSymbol(ModConfig.Instance.UnitOfDistance) + ")";
                             _infoTagLabels[i].tooltip = "Elevation is the height above sea level for start point.";
                             break;
                         case 1:
-                            _infoTagLabels[i].text = "Relief (" + GetUnitOfLengthSymbol(ModConfig.Instance.UnitOfLength) + ")";
+                            _infoTagLabels[i].text = "Relief (" + GetUnitOfDistanceSymbol(ModConfig.Instance.UnitOfDistance) + ")";
                             _infoTagLabels[i].tooltip = "Relief is the height difference between start and end point.";
                             break;
                         case 2:
-                            _infoTagLabels[i].text = "Distance (" + GetUnitOfLengthSymbol(ModConfig.Instance.UnitOfLength) + ")";
-                            _infoTagLabels[i].tooltip = "Distance is the flat distance between start and end point.";
+                            _infoTagLabels[i].text = "Length (" + GetUnitOfDistanceSymbol(ModConfig.Instance.UnitOfDistance) + ")";
+                            _infoTagLabels[i].tooltip = "Length is the flat distance between start (and middle) and end point.";
                             break;
                         case 3:
+                            _infoTagLabels[i].text = "Distance (" + GetUnitOfDistanceSymbol(ModConfig.Instance.UnitOfDistance) + ")";
+                            _infoTagLabels[i].tooltip = "Distance is the straigt distance between start (and middle) and end point.";
+                            break;
+                        case 4:
                             _infoTagLabels[i].text = "Slope (" + GetUnitOfSlopeSymbol(ModConfig.Instance.UnitOfSlope) + ")";
                             _infoTagLabels[i].tooltip = "Slope is the average incline between start and end point.";
                             break;
-                        case 4:
+                        case 5:
                             _infoTagLabels[i].text = "Direction (" + GetUnitOfDirectionSymbol(ModConfig.Instance.UnitOfDirection) + ")";
-                            _infoTagLabels[i].tooltip = "Direction is the cartographic orientation between start and end point.";
+                            _infoTagLabels[i].tooltip = "Direction is the cartographic orientation between start or middle and end point.";
                             break;
                         default:
                             break;
@@ -333,23 +337,26 @@ namespace MeasureIt
         {
             try
             {
-                for (int i = 0; i < 5; i++)
+                for (int i = 0; i < 6; i++)
                 {
                     switch (i)
                     {
                         case 0:
-                            _infoValueLabels[i].text = DisplayLength(ModConfig.Instance.UnitOfLength, MeasureInfo.Instance.Elevation);
+                            _infoValueLabels[i].text = DisplayDistance(ModConfig.Instance.UnitOfDistance, MeasureInfo.Instance.Elevation);
                             break;
                         case 1:
-                            _infoValueLabels[i].text = DisplayLength(ModConfig.Instance.UnitOfLength, MeasureInfo.Instance.Relief);
+                            _infoValueLabels[i].text = DisplayDistance(ModConfig.Instance.UnitOfDistance, MeasureInfo.Instance.Relief);
                             break;
                         case 2:
-                            _infoValueLabels[i].text = DisplayLength(ModConfig.Instance.UnitOfLength, MeasureInfo.Instance.Distance);
+                            _infoValueLabels[i].text = DisplayDistance(ModConfig.Instance.UnitOfDistance, MeasureInfo.Instance.Length);
                             break;
                         case 3:
-                            _infoValueLabels[i].text = DisplaySlope(ModConfig.Instance.UnitOfSlope, MeasureInfo.Instance.Slope);
+                            _infoValueLabels[i].text = DisplayDistance(ModConfig.Instance.UnitOfDistance, MeasureInfo.Instance.Distance);
                             break;
                         case 4:
+                            _infoValueLabels[i].text = DisplaySlope(ModConfig.Instance.UnitOfSlope, MeasureInfo.Instance.Slope);
+                            break;
+                        case 5:
                             _infoValueLabels[i].text = DisplayDirection(ModConfig.Instance.UnitOfDirection, MeasureInfo.Instance.Direction);
                             break;
                         default:
@@ -363,11 +370,11 @@ namespace MeasureIt
             }
         }
 
-        private string GetUnitOfLengthSymbol(int unitOfLength)
+        private string GetUnitOfDistanceSymbol(int unitOfDistance)
         {
             try
             {
-                switch (unitOfLength)
+                switch (unitOfDistance)
                 {
                     case 0:
                         return "u";
@@ -383,7 +390,7 @@ namespace MeasureIt
             }
             catch (Exception e)
             {
-                Debug.Log("[Measure It!] MeasureManager:GetUnitOfLengthSymbol -> Exception: " + e.Message);
+                Debug.Log("[Measure It!] MeasureManager:GetUnitOfDistanceSymbol -> Exception: " + e.Message);
                 return string.Empty;
             }
         }
@@ -430,40 +437,40 @@ namespace MeasureIt
             }
         }
 
-        private float ConvertLength(int unitOfLength, float length)
+        private float ConvertDistance(int unitOfDistance, float distance)
         {
             try
             {
-                switch (unitOfLength)
+                switch (unitOfDistance)
                 {
                     case 0:
-                        return length;
+                        return distance;
                     case 1:
-                        return length;
+                        return distance;
                     case 2:
-                        return length / 0.9144f;
+                        return distance / 0.9144f;
                     case 3:
-                        return length / 0.3048f;
+                        return distance / 0.3048f;
                     default:
-                        return length;
+                        return distance;
                 }
             }
             catch (Exception e)
             {
-                Debug.Log("[Measure It!] MeasureManager:ConvertLength -> Exception: " + e.Message);
+                Debug.Log("[Measure It!] MeasureManager:ConvertDistance -> Exception: " + e.Message);
                 return 0f;
             }
         }
 
-        private string DisplayLength(int unitOfLength, float length)
+        private string DisplayDistance(int unitOfDistance, float distance)
         {
             try
             {
-                return $"{ConvertLength(unitOfLength, length):0.##}";
+                return $"{ConvertDistance(unitOfDistance, distance):0.##}";
             }
             catch (Exception e)
             {
-                Debug.Log("[Measure It!] MeasureManager:DisplayLength -> Exception: " + e.Message);
+                Debug.Log("[Measure It!] MeasureManager:DisplayDistance -> Exception: " + e.Message);
                 return string.Empty;
             }
         }
