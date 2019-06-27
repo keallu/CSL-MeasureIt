@@ -7,7 +7,6 @@
         public bool ShowControlPanel { get; set; } = true;
         public float ControlPanelPositionX { get; set; }
         public float ControlPanelPositionY { get; set; }
-        public int Cells { get; set; } = 4;
         public bool ShowInfoPanel { get; set; } = true;
         public float InfoPanelPositionX { get; set; }
         public float InfoPanelPositionY { get; set; }

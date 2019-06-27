@@ -4,17 +4,17 @@ using UnityEngine;
 
 namespace MeasureIt
 {
-    public class MeasureManager : MonoBehaviour
+    public class ModManager : MonoBehaviour
     {
         private bool _initialized;
 
         private UIButton _esc;
         private NetTool _netTool;
 
-        private UIPanel _controlPanel;
-        private UIDragHandle _controlDragHandle;
-        private UIPanel _controlInnerPanel;
-        private UIButton[] _controlButtons;
+        //private UIPanel _controlPanel;
+        //private UIDragHandle _controlDragHandle;
+        //private UIPanel _controlInnerPanel;
+        //private UIButton[] _controlButtons;
 
         private UIPanel _infoPanel;
         private UIDragHandle _infoDragHandle;
@@ -31,11 +31,11 @@ namespace MeasureIt
                 if (_esc == null)
                 {
                     _esc = GameObject.Find("Esc").GetComponent<UIButton>();
-                    MeasureProperties.Instance.ControlPanelDefaultPositionX = _esc.absolutePosition.x - 550f;
-                    MeasureProperties.Instance.ControlPanelDefaultPositionY = _esc.absolutePosition.y;
+                    ModProperties.Instance.ControlPanelDefaultPositionX = _esc.absolutePosition.x - 336f;
+                    ModProperties.Instance.ControlPanelDefaultPositionY = _esc.absolutePosition.y;
 
-                    MeasureProperties.Instance.InfoPanelDefaultPositionX = MeasureProperties.Instance.ControlPanelDefaultPositionX + 175f;
-                    MeasureProperties.Instance.InfoPanelDefaultPositionY = MeasureProperties.Instance.ControlPanelDefaultPositionY;
+                    ModProperties.Instance.InfoPanelDefaultPositionX = ModProperties.Instance.ControlPanelDefaultPositionX + 70f;
+                    ModProperties.Instance.InfoPanelDefaultPositionY = ModProperties.Instance.ControlPanelDefaultPositionY;
                 }
 
                 if (_netTool == null)
@@ -45,7 +45,7 @@ namespace MeasureIt
             }
             catch (Exception e)
             {
-                Debug.Log("[Measure It!] MeasureManager:Awake -> Exception: " + e.Message);
+                Debug.Log("[Measure It!] ModManager:Awake -> Exception: " + e.Message);
             }
         }
 
@@ -55,20 +55,20 @@ namespace MeasureIt
             {
                 if (ModConfig.Instance.ControlPanelPositionX == 0.0f)
                 {
-                    ModConfig.Instance.ControlPanelPositionX = MeasureProperties.Instance.ControlPanelDefaultPositionX;
+                    ModConfig.Instance.ControlPanelPositionX = ModProperties.Instance.ControlPanelDefaultPositionX;
                 }
                 if (ModConfig.Instance.ControlPanelPositionY == 0.0f)
                 {
-                    ModConfig.Instance.ControlPanelPositionY = MeasureProperties.Instance.ControlPanelDefaultPositionY;
+                    ModConfig.Instance.ControlPanelPositionY = ModProperties.Instance.ControlPanelDefaultPositionY;
                 }
 
                 if (ModConfig.Instance.InfoPanelPositionX == 0.0f)
                 {
-                    ModConfig.Instance.InfoPanelPositionX = MeasureProperties.Instance.InfoPanelDefaultPositionX;
+                    ModConfig.Instance.InfoPanelPositionX = ModProperties.Instance.InfoPanelDefaultPositionX;
                 }
                 if (ModConfig.Instance.InfoPanelPositionY == 0.0f)
                 {
-                    ModConfig.Instance.InfoPanelPositionY = MeasureProperties.Instance.InfoPanelDefaultPositionY;
+                    ModConfig.Instance.InfoPanelPositionY = ModProperties.Instance.InfoPanelDefaultPositionY;
                 }
 
                 if (_netTool != null)
@@ -76,7 +76,7 @@ namespace MeasureIt
                     MeasureInfo.Instance.Initialize(_netTool);
                 }
 
-                _controlButtons = new UIButton[4];
+                //_controlButtons = new UIButton[2];
 
                 _infoTagLabels = new UILabel[6];
                 _infoValueLabels = new UILabel[6];
@@ -85,7 +85,7 @@ namespace MeasureIt
             }
             catch (Exception e)
             {
-                Debug.Log("[Measure It!] MeasureManager:Start -> Exception: " + e.Message);
+                Debug.Log("[Measure It!] ModManager:Start -> Exception: " + e.Message);
             }
         }
 
@@ -113,26 +113,26 @@ namespace MeasureIt
                 {
                     Destroy(_infoPanel);
                 }
-                foreach (UIButton button in _controlButtons)
-                {
-                    Destroy(button);
-                }
-                if (_controlInnerPanel != null)
-                {
-                    Destroy(_controlInnerPanel);
-                }
-                if (_controlDragHandle != null)
-                {
-                    Destroy(_controlDragHandle);
-                }
-                if (_controlPanel != null)
-                {
-                    Destroy(_controlPanel);
-                }
+                //foreach (UIButton button in _controlButtons)
+                //{
+                //    Destroy(button);
+                //}
+                //if (_controlInnerPanel != null)
+                //{
+                //    Destroy(_controlInnerPanel);
+                //}
+                //if (_controlDragHandle != null)
+                //{
+                //    Destroy(_controlDragHandle);
+                //}
+                //if (_controlPanel != null)
+                //{
+                //    Destroy(_controlPanel);
+                //}
             }
             catch (Exception e)
             {
-                Debug.Log("[Measure It!] MeasureManager:OnDestroy -> Exception: " + e.Message);
+                Debug.Log("[Measure It!] ModManager:OnDestroy -> Exception: " + e.Message);
             }
         }
 
@@ -150,11 +150,11 @@ namespace MeasureIt
 
                 if (_netTool != null && _netTool.enabled && _netTool.m_mode != NetTool.Mode.Upgrade)
                 {
-                    if (!_controlPanel.isVisible)
-                    {
-                        _controlPanel.isVisible = true;
-                    }
-                    if (!_infoPanel.isVisible)
+                    //if (!_controlPanel.isVisible && ModConfig.Instance.ShowControlPanel)
+                    //{
+                    //    _controlPanel.isVisible = true;
+                    //}
+                    if (!_infoPanel.isVisible && ModConfig.Instance.ShowInfoPanel)
                     {
                         _infoPanel.isVisible = true;
                     }
@@ -164,13 +164,13 @@ namespace MeasureIt
                 }
                 else
                 {
-                    _controlPanel.isVisible = false;
+                    //_controlPanel.isVisible = false;
                     _infoPanel.isVisible = false;
                 }
             }
             catch (Exception e)
             {
-                Debug.Log("[Measure It!] MeasureManager:Update -> Exception: " + e.Message);
+                Debug.Log("[Measure It!] ModManager:Update -> Exception: " + e.Message);
             }
         }
 
@@ -178,51 +178,52 @@ namespace MeasureIt
         {
             try
             {
-                _controlPanel = UIUtils.CreatePanel("MeasureItControlPanel");
-                _controlPanel.zOrder = 0;
-                _controlPanel.backgroundSprite = "SubcategoriesPanel";
-                _controlPanel.size = new Vector2(170f, 62f);
-                _controlPanel.isVisible = false;
+                //_controlPanel = UIUtils.CreatePanel("MeasureItControlPanel");
+                //_controlPanel.zOrder = 0;
+                //_controlPanel.backgroundSprite = "GenericPanelLight";
+                //_controlPanel.color = new Color32(96, 96, 96, 255);
+                //_controlPanel.size = new Vector2(62f, 98f);
+                //_controlPanel.isVisible = false;
 
-                _controlDragHandle = UIUtils.CreateDragHandle(_controlPanel, "ControlDragHandle");
-                _controlDragHandle.size = new Vector2(_controlDragHandle.parent.width, _controlDragHandle.parent.height);
-                _controlDragHandle.relativePosition = new Vector3(0f, 0f);
-                _controlDragHandle.eventMouseUp += (component, eventParam) =>
-                {
-                    ModConfig.Instance.ControlPanelPositionX = _controlPanel.absolutePosition.x;
-                    ModConfig.Instance.ControlPanelPositionY = _controlPanel.absolutePosition.y;
-                    ModConfig.Instance.Save();
-                };
+                //_controlDragHandle = UIUtils.CreateDragHandle(_controlPanel, "ControlDragHandle");
+                //_controlDragHandle.size = new Vector2(_controlDragHandle.parent.width, _controlDragHandle.parent.height);
+                //_controlDragHandle.relativePosition = new Vector3(0f, 0f);
+                //_controlDragHandle.eventMouseUp += (component, eventParam) =>
+                //{
+                //    ModConfig.Instance.ControlPanelPositionX = _controlPanel.absolutePosition.x;
+                //    ModConfig.Instance.ControlPanelPositionY = _controlPanel.absolutePosition.y;
+                //    ModConfig.Instance.Save();
+                //};
 
-                _controlInnerPanel = UIUtils.CreatePanel(_controlPanel, "ControlInnerPanel");
-                _controlInnerPanel.backgroundSprite = "GenericPanel";
-                _controlInnerPanel.size = new Vector2(_controlInnerPanel.parent.width - 16f, _controlInnerPanel.parent.height - 16f);
-                _controlInnerPanel.relativePosition = new Vector3(8f, 8f);
+                //_controlInnerPanel = UIUtils.CreatePanel(_controlPanel, "ControlInnerPanel");
+                //_controlInnerPanel.backgroundSprite = "GenericPanelLight";
+                //_controlInnerPanel.color = new Color32(206, 206, 206, 255);
+                //_controlInnerPanel.size = new Vector2(_controlInnerPanel.parent.width - 16f, _controlInnerPanel.parent.height - 16f);
+                //_controlInnerPanel.relativePosition = new Vector3(8f, 8f);
 
-                for (int i = 0; i < 4; i++)
-                {
-                    UIButton button = UIUtils.CreateButton(_controlInnerPanel, "Control" + (i + 1), (i + 1).ToString());
-                    button.objectUserData = i;
-                    button.tooltip = $"Zone radius effect: {i + 1} x {i + 1}";
-                    button.relativePosition = new Vector3(5f + i * 36f, 5f);
-                    button.eventClick += (component, eventParam) =>
-                    {
-                        if (!eventParam.used)
-                        {
-                            ModConfig.Instance.Cells = (int)button.objectUserData + 1;
-                            UpdateButtons(ModConfig.Instance.Cells);
-                            ModConfig.Instance.Save();
+                //for (int i = 0; i < 2; i++)
+                //{
+                //    UIButton button = UIUtils.CreateButton(_controlInnerPanel, "Control" + (i + 1), (i + 1).ToString());
+                //    button.objectUserData = i;
+                //    button.tooltip = "Unavailable";
+                //    button.relativePosition = new Vector3(5f, 5f + i * 36f);
+                //    button.eventClick += (component, eventParam) =>
+                //    {
+                //        if (!eventParam.used)
+                //        {
 
-                            eventParam.Use();
-                        }
-                    };
 
-                    _controlButtons[i] = button;
-                }
+                //            eventParam.Use();
+                //        }
+                //    };
+
+                //    _controlButtons[i] = button;
+                //}
 
                 _infoPanel = UIUtils.CreatePanel("MeasureItInfoPanel");
                 _infoPanel.zOrder = 0;
-                _infoPanel.backgroundSprite = "SubcategoriesPanel";
+                _infoPanel.backgroundSprite = "GenericPanelLight";
+                _infoPanel.color = new Color32(96, 96, 96, 255);
                 _infoPanel.size = new Vector2(190f, 136f);
                 _infoPanel.isVisible = false;
 
@@ -237,7 +238,8 @@ namespace MeasureIt
                 };
 
                 _infoInnerPanel = UIUtils.CreatePanel(_infoPanel, "InfoInnerPanel");
-                _infoInnerPanel.backgroundSprite = "GenericPanel";
+                _infoInnerPanel.backgroundSprite = "GenericPanelLight";
+                _infoInnerPanel.color = new Color32(206, 206, 206, 255);
                 _infoInnerPanel.size = new Vector2(_infoInnerPanel.parent.width - 16f, _infoInnerPanel.parent.height - 16f);
                 _infoInnerPanel.relativePosition = new Vector3(8f, 8f);
 
@@ -256,7 +258,7 @@ namespace MeasureIt
             }
             catch (Exception e)
             {
-                Debug.Log("[Measure It!] MeasureManager:CreateUI -> Exception: " + e.Message);
+                Debug.Log("[Measure It!] ModManager:CreateUI -> Exception: " + e.Message);
             }
         }
 
@@ -264,10 +266,8 @@ namespace MeasureIt
         {
             try
             {
-                _controlPanel.absolutePosition = new Vector3(ModConfig.Instance.ControlPanelPositionX, ModConfig.Instance.ControlPanelPositionY);
-                _controlPanel.isVisible = ModConfig.Instance.ShowControlPanel;
-
-                UpdateButtons(ModConfig.Instance.Cells);
+                //_controlPanel.absolutePosition = new Vector3(ModConfig.Instance.ControlPanelPositionX, ModConfig.Instance.ControlPanelPositionY);
+                //_controlPanel.isVisible = ModConfig.Instance.ShowControlPanel;
 
                 _infoPanel.absolutePosition = new Vector3(ModConfig.Instance.InfoPanelPositionX, ModConfig.Instance.InfoPanelPositionY);
                 _infoPanel.isVisible = ModConfig.Instance.ShowInfoPanel;
@@ -307,29 +307,7 @@ namespace MeasureIt
             }
             catch (Exception e)
             {
-                Debug.Log("[Measure It!] MeasureManager:UpdateUI -> Exception: " + e.Message);
-            }
-        }
-
-        private void UpdateButtons(int selected)
-        {
-            try
-            {
-                for (int i = 0; i < 4; i++)
-                {
-                    if ((i + 1) == selected)
-                    {
-                        _controlButtons[i].normalBgSprite = "OptionBaseFocused";
-                    }
-                    else
-                    {
-                        _controlButtons[i].normalBgSprite = "OptionBase";
-                    }
-                }
-            }
-            catch (Exception e)
-            {
-                Debug.Log("[Measure It!] MeasureManager:UpdateButtons -> Exception: " + e.Message);
+                Debug.Log("[Measure It!] ModManager:UpdateUI -> Exception: " + e.Message);
             }
         }
 
@@ -366,7 +344,7 @@ namespace MeasureIt
             }
             catch (Exception e)
             {
-                Debug.Log("[Measure It!] MeasureManager:UpdateInfo -> Exception: " + e.Message);
+                Debug.Log("[Measure It!] ModManager:UpdateInfo -> Exception: " + e.Message);
             }
         }
 
@@ -390,7 +368,7 @@ namespace MeasureIt
             }
             catch (Exception e)
             {
-                Debug.Log("[Measure It!] MeasureManager:GetUnitOfDistanceSymbol -> Exception: " + e.Message);
+                Debug.Log("[Measure It!] ModManager:GetUnitOfDistanceSymbol -> Exception: " + e.Message);
                 return string.Empty;
             }
         }
@@ -411,7 +389,7 @@ namespace MeasureIt
             }
             catch (Exception e)
             {
-                Debug.Log("[Measure It!] MeasureManager:GetUnitOfSlopeSymbol -> Exception: " + e.Message);
+                Debug.Log("[Measure It!] ModManager:GetUnitOfSlopeSymbol -> Exception: " + e.Message);
                 return string.Empty;
             }
         }
@@ -432,7 +410,7 @@ namespace MeasureIt
             }
             catch (Exception e)
             {
-                Debug.Log("[Measure It!] MeasureManager:GetUnitOfDirectionSymbol -> Exception: " + e.Message);
+                Debug.Log("[Measure It!] ModManager:GetUnitOfDirectionSymbol -> Exception: " + e.Message);
                 return string.Empty;
             }
         }
@@ -457,7 +435,7 @@ namespace MeasureIt
             }
             catch (Exception e)
             {
-                Debug.Log("[Measure It!] MeasureManager:ConvertDistance -> Exception: " + e.Message);
+                Debug.Log("[Measure It!] ModManager:ConvertDistance -> Exception: " + e.Message);
                 return 0f;
             }
         }
@@ -470,7 +448,7 @@ namespace MeasureIt
             }
             catch (Exception e)
             {
-                Debug.Log("[Measure It!] MeasureManager:DisplayDistance -> Exception: " + e.Message);
+                Debug.Log("[Measure It!] ModManager:DisplayDistance -> Exception: " + e.Message);
                 return string.Empty;
             }
         }
@@ -491,7 +469,7 @@ namespace MeasureIt
             }
             catch (Exception e)
             {
-                Debug.Log("[Measure It!] MeasureManager:ConvertSlope -> Exception: " + e.Message);
+                Debug.Log("[Measure It!] ModManager:ConvertSlope -> Exception: " + e.Message);
                 return 0f;
             }
         }
@@ -504,7 +482,7 @@ namespace MeasureIt
             }
             catch (Exception e)
             {
-                Debug.Log("[Measure It!] MeasureManager:DisplaySlope -> Exception: " + e.Message);
+                Debug.Log("[Measure It!] ModManager:DisplaySlope -> Exception: " + e.Message);
                 return string.Empty;
             }
         }
@@ -525,7 +503,7 @@ namespace MeasureIt
             }
             catch (Exception e)
             {
-                Debug.Log("[Measure It!] MeasureManager:DisplayDirection -> Exception: " + e.Message);
+                Debug.Log("[Measure It!] ModManager:DisplayDirection -> Exception: " + e.Message);
                 return string.Empty;
             }
         }

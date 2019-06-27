@@ -6,14 +6,14 @@ namespace MeasureIt
 {
     public class Loading : LoadingExtensionBase
     {
-        private GameObject _measureManagerGameObject;
+        private GameObject _modManagerGameObject;
 
         public override void OnLevelLoaded(LoadMode mode)
         {
             try
             {
-                _measureManagerGameObject = new GameObject("MeasureItMeasureManager");
-                _measureManagerGameObject.AddComponent<MeasureManager>();
+                _modManagerGameObject = new GameObject("MeasureItModManager");
+                _modManagerGameObject.AddComponent<ModManager>();
             }
             catch (Exception e)
             {
@@ -25,9 +25,9 @@ namespace MeasureIt
         {
             try
             {
-                if (_measureManagerGameObject != null)
+                if (_modManagerGameObject != null)
                 {
-                    UnityEngine.Object.Destroy(_measureManagerGameObject);
+                    UnityEngine.Object.Destroy(_modManagerGameObject);
                 }
 
             }

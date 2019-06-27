@@ -3,20 +3,20 @@ using UnityEngine;
 
 namespace MeasureIt
 {
-    public class MeasureProperties
+    public class ModProperties
     {
         public float ControlPanelDefaultPositionX;
         public float ControlPanelDefaultPositionY;
         public float InfoPanelDefaultPositionX;
         public float InfoPanelDefaultPositionY;
 
-        private static MeasureProperties instance;
+        private static ModProperties instance;
 
-        public static MeasureProperties Instance
+        public static ModProperties Instance
         {
             get
             {
-                return instance ?? (instance = new MeasureProperties());
+                return instance ?? (instance = new ModProperties());
             }
         }
 
@@ -30,7 +30,7 @@ namespace MeasureIt
             }
             catch (Exception e)
             {
-                Debug.Log("[Measure It!] MeasureProperties:ResetControlPanelPosition -> Exception: " + e.Message);
+                Debug.Log("[Measure It!] ModProperties:ResetControlPanelPosition -> Exception: " + e.Message);
             }
         }
 
@@ -44,7 +44,7 @@ namespace MeasureIt
             }
             catch (Exception e)
             {
-                Debug.Log("[Measure It!] MeasureProperties:ResetInfoPanelPosition -> Exception: " + e.Message);
+                Debug.Log("[Measure It!] ModProperties:ResetInfoPanelPosition -> Exception: " + e.Message);
             }
         }
     }

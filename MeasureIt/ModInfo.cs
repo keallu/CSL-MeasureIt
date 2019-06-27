@@ -1,25 +1,11 @@
-﻿using Harmony;
-using ICities;
-using System.Reflection;
+﻿using ICities;
 
 namespace MeasureIt
 {
     public class ModInfo : IUserMod
     {
         public string Name => "Measure It!";
-        public string Description => "Helps with measures when placing roads.";
-
-        public void OnEnabled()
-        {
-            var harmony = HarmonyInstance.Create("com.github.keallu.csl.measureit");
-            harmony.PatchAll(Assembly.GetExecutingAssembly());
-        }
-
-        public void OnDisabled()
-        {
-            var harmony = HarmonyInstance.Create("com.github.keallu.csl.measureit");
-            harmony.UnpatchAll();
-        }
+        public string Description => "Helps with measures when placing networks.";
 
         public static readonly string[] UnitOfDistanceLabels =
         {
@@ -69,21 +55,21 @@ namespace MeasureIt
 
             group = helper.AddGroup(Name);
 
-            selected = ModConfig.Instance.ShowControlPanel;
-            group.AddCheckbox("Show Control Panel", selected, sel =>
-            {
-                ModConfig.Instance.ShowControlPanel = sel;
-                ModConfig.Instance.Save();
-            });
+            //selected = ModConfig.Instance.ShowControlPanel;
+            //group.AddCheckbox("Show Control Panel", selected, sel =>
+            //{
+            //    ModConfig.Instance.ShowControlPanel = sel;
+            //    ModConfig.Instance.Save();
+            //});
 
-            group.AddSpace(10);
+            //group.AddSpace(10);
 
-            group.AddButton("Reset Positioning of Control Panel", () =>
-            {
-                MeasureProperties.Instance.ResetControlPanelPosition();
-            });
+            //group.AddButton("Reset Positioning of Control Panel", () =>
+            //{
+            //    MeasureProperties.Instance.ResetControlPanelPosition();
+            //});
 
-            group = helper.AddGroup("Additional Measures");
+            //group = helper.AddGroup("Measures");
 
             selected = ModConfig.Instance.ShowInfoPanel;
             group.AddCheckbox("Show Info Panel", selected, sel =>
@@ -117,7 +103,7 @@ namespace MeasureIt
 
             group.AddButton("Reset Positioning of Info Panel", () =>
             {
-                MeasureProperties.Instance.ResetInfoPanelPosition();
+                ModProperties.Instance.ResetInfoPanelPosition();
             });
         }
     }
