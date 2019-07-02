@@ -5,7 +5,7 @@ namespace MeasureIt
     public class ModInfo : IUserMod
     {
         public string Name => "Measure It!";
-        public string Description => "Helps with measures when placing networks.";
+        public string Description => "Helps with measurements.";
 
         public static readonly string[] UnitOfDistanceLabels =
         {
@@ -55,21 +55,21 @@ namespace MeasureIt
 
             group = helper.AddGroup(Name);
 
-            //selected = ModConfig.Instance.ShowControlPanel;
-            //group.AddCheckbox("Show Control Panel", selected, sel =>
-            //{
-            //    ModConfig.Instance.ShowControlPanel = sel;
-            //    ModConfig.Instance.Save();
-            //});
+            selected = ModConfig.Instance.ShowControlPanel;
+            group.AddCheckbox("Show Control Panel", selected, sel =>
+            {
+                ModConfig.Instance.ShowControlPanel = sel;
+                ModConfig.Instance.Save();
+            });
 
-            //group.AddSpace(10);
+            group.AddSpace(10);
 
-            //group.AddButton("Reset Positioning of Control Panel", () =>
-            //{
-            //    MeasureProperties.Instance.ResetControlPanelPosition();
-            //});
+            group.AddButton("Reset Positioning of Control Panel", () =>
+            {
+                ModProperties.Instance.ResetControlPanelPosition();
+            });
 
-            //group = helper.AddGroup("Measures");
+            group = helper.AddGroup("Measurements");
 
             selected = ModConfig.Instance.ShowInfoPanel;
             group.AddCheckbox("Show Info Panel", selected, sel =>

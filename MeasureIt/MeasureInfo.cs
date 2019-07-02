@@ -12,17 +12,19 @@ namespace MeasureIt
         public float Relief;
         public float Length;
         public float Distance;
+        public float Curvature;
         public float Slope;
         public float Direction;
 
         private TerrainManager _terrainManager;
 
+        private MeasureTool _measureTool;
+
         private NetTool _netTool;
         private FieldInfo _controlPointCountField;
         private FieldInfo _controlPointsField;
-
-        private int _controlPointCount;
         private NetTool.ControlPoint[] _controlPoints;
+
         private Vector3 _startPosition;
         private Vector3 _bendPosition;
         private Vector3 _endPosition;
@@ -39,13 +41,15 @@ namespace MeasureIt
             }
         }
 
-        public void Initialize(NetTool netTool)
+        public void Initialize(MeasureTool measureTool, NetTool netTool)
         {
             try
             {
                 _terrainManager = Singleton<TerrainManager>.instance;
 
+                _measureTool = measureTool;
                 _netTool = netTool;
+
                 _controlPointCountField = netTool.GetType().GetField("m_controlPointCount", BindingFlags.NonPublic | BindingFlags.Instance);
                 _controlPointsField = netTool.GetType().GetField("m_controlPoints", BindingFlags.NonPublic | BindingFlags.Instance);
             }
@@ -59,46 +63,90 @@ namespace MeasureIt
         {
             try
             {
-                int controlPointCount = (int)_controlPointCountField.GetValue(_netTool);
-
-                if (_controlPoints == null)
+                if (_measureTool.enabled)
                 {
-                    _controlPoints = _controlPointsField.GetValue(_netTool) as NetTool.ControlPoint[];
+                    int pointCount = _measureTool.PointCount;
+
+                    _startPosition = _measureTool.StartPosition;
+                    _startHeight = _terrainManager.SampleRawHeightSmooth(_measureTool.StartPosition);
+
+                    Elevation = _startHeight - _terrainManager.WaterSimulation.m_currentSeaLevel;
+
+                    if (pointCount == 1)
+                    {
+                        _endPosition = _measureTool.EndPosition;
+                        _endHeight = _terrainManager.SampleRawHeightSmooth(_measureTool.EndPosition);
+
+                        Length = VectorUtils.LengthXZ(_endPosition - _startPosition);
+                        Distance = Vector3.Distance(_endPosition, _startPosition);
+                        Direction = CalculateAngle(Vector3.down, VectorUtils.XZ(_endPosition - _startPosition));
+                    }
+
+                    Relief = pointCount > 0 ? _endHeight - _startHeight : 0f;
+                    Length = pointCount > 0 ? Length : 0f;
+                    Distance = pointCount > 0 ? Distance : 0f;
+                    Curvature = 0f;
+                    Slope = pointCount > 0 ? (Length > 0f ? Relief / Length : 0f) : 0f;
+                    Direction = pointCount > 0 ? Direction : 0f;
                 }
-
-                _startPosition = _controlPoints[0].m_position;
-                _startHeight = _terrainManager.SampleRawHeightSmooth(_controlPoints[0].m_position) + _controlPoints[0].m_elevation;
-
-                Elevation = _startHeight - _terrainManager.WaterSimulation.m_currentSeaLevel;
-
-                if (_controlPointCount == 1)
+                else if (_netTool.enabled)
                 {
-                    _endPosition = _controlPoints[1].m_position;
-                    _endHeight = _terrainManager.SampleRawHeightSmooth(_controlPoints[1].m_position) + _controlPoints[1].m_elevation;
-                    Length = VectorUtils.LengthXZ(_endPosition - _startPosition); 
-                    Distance = Vector3.Distance(_endPosition, _startPosition);
-                    Direction = CalculateAngle(Vector3.down, VectorUtils.XZ(_endPosition - _startPosition));
-                }
-                else if (_controlPointCount == 2)
-                {
-                    _bendPosition = _controlPoints[1].m_position;
-                    _endPosition = _controlPoints[2].m_position;
-                    _endHeight = _terrainManager.SampleRawHeightSmooth(_controlPoints[2].m_position) + _controlPoints[2].m_elevation;
-                    NetSegment.CalculateMiddlePoints(_controlPoints[0].m_position, _controlPoints[0].m_direction, _controlPoints[2].m_position, _controlPoints[2].m_direction, false, false, out Vector3 middle1Position, out Vector3 middle2Position);
-                    Length = CalculateDistance(_startPosition, middle1Position, middle2Position, _endPosition);
-                    Distance = CalculateLength(_startPosition, middle1Position, middle2Position, _endPosition); 
-                    Direction = CalculateAngle(Vector3.down, VectorUtils.XZ(_endPosition - _bendPosition));
-                }
+                    int controlPointCount = (int)_controlPointCountField.GetValue(_netTool);
 
-                Relief = _controlPointCount > 0 ? _endHeight - _startHeight : 0f;
-                Slope = _controlPointCount > 0 ? (Length > 0f ? Relief / Length : 0f) : 0f;
+                    if (_controlPoints == null)
+                    {
+                        _controlPoints = _controlPointsField.GetValue(_netTool) as NetTool.ControlPoint[];
+                    }
 
-                _controlPointCount = controlPointCount;
+                    _startPosition = _controlPoints[0].m_position;
+                    _startHeight = _terrainManager.SampleRawHeightSmooth(_controlPoints[0].m_position) + _controlPoints[0].m_elevation;
+
+                    Elevation = _startHeight - _terrainManager.WaterSimulation.m_currentSeaLevel;
+
+                    if (controlPointCount == 1)
+                    {
+                        _endPosition = _controlPoints[1].m_position;
+                        _endHeight = _terrainManager.SampleRawHeightSmooth(_controlPoints[1].m_position) + _controlPoints[1].m_elevation;
+                        Length = VectorUtils.LengthXZ(_endPosition - _startPosition);
+                        Distance = Vector3.Distance(_endPosition, _startPosition);
+                        Curvature = 0f;
+                        Direction = CalculateAngle(Vector3.down, VectorUtils.XZ(_endPosition - _startPosition));
+                    }
+                    else if (controlPointCount == 2)
+                    {
+                        _bendPosition = _controlPoints[1].m_position;
+                        _endPosition = _controlPoints[2].m_position;
+                        _endHeight = _terrainManager.SampleRawHeightSmooth(_controlPoints[2].m_position) + _controlPoints[2].m_elevation;
+                        CalculateMiddlePoints(_startPosition, _bendPosition, _endPosition, out Vector3 middle1Position, out Vector3 middle2Position);
+                        Length = CalculateLength(_startPosition, middle1Position, middle2Position, _endPosition);
+                        Distance = CalculateDistance(_startPosition, middle1Position, middle2Position, _endPosition);
+                        Curvature = CalculateCurvature(_startPosition, _bendPosition, _endPosition);
+                        Direction = CalculateAngle(Vector3.down, VectorUtils.XZ(_endPosition - _bendPosition));
+                    }
+
+                    Relief = controlPointCount > 0 ? _endHeight - _startHeight : 0f;
+                    Length = controlPointCount > 0 ? Length : 0f;
+                    Distance = controlPointCount > 0 ? Distance : 0f;
+                    Curvature = controlPointCount > 0 ? Curvature : 0f;
+                    Slope = controlPointCount > 0 ? (Length > 0f ? Relief / Length : 0f) : 0f;
+                    Direction = controlPointCount > 0 ? Direction : 0f;
+                }
             }
             catch (Exception e)
             {
                 Debug.Log("[Measure It!] MeasureInfo:Update -> Exception: " + e.Message);
             }
+        }
+
+        private void CalculateMiddlePoints(Vector3 start, Vector3 bend, Vector3 end, out Vector3 middle1Position, out Vector3 middle2Position)
+        {
+            middle1Position = Vector3.Lerp(Vector3.Lerp(start, bend, 0.3f),
+                                           Vector3.Lerp(bend, end, 0.3f),
+                                           0.3f);
+
+            middle2Position = Vector3.Lerp(Vector3.Lerp(start, bend, 0.6f),
+                                           Vector3.Lerp(bend, end, 0.6f),
+                                           0.6f);
         }
 
         private float CalculateLength(Vector3 start, Vector3 middle1, Vector3 middle2, Vector3 end)
@@ -121,6 +169,11 @@ namespace MeasureIt
             length += Vector3.Distance(middle2, end);
 
             return length;
+        }
+
+        private float CalculateCurvature(Vector3 start, Vector3 bend, Vector3 end)
+        {
+            return 0f;
         }
 
         private float CalculateAngle(Vector3 from, Vector3 to)

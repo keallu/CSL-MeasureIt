@@ -12,6 +12,12 @@ namespace MeasureIt
         {
             try
             {
+                ToolController toolController = UnityEngine.Object.FindObjectOfType<ToolController>();
+                if (toolController != null)
+                {
+                    MeasureTool.Instance = toolController.gameObject.AddComponent<MeasureTool>();
+                }
+
                 _modManagerGameObject = new GameObject("MeasureItModManager");
                 _modManagerGameObject.AddComponent<ModManager>();
             }
@@ -28,6 +34,11 @@ namespace MeasureIt
                 if (_modManagerGameObject != null)
                 {
                     UnityEngine.Object.Destroy(_modManagerGameObject);
+                }
+
+                if (MeasureTool.Instance != null)
+                {
+                    UnityEngine.Object.Destroy(MeasureTool.Instance);
                 }
 
             }

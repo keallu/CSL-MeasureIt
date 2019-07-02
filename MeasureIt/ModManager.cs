@@ -9,12 +9,14 @@ namespace MeasureIt
         private bool _initialized;
 
         private UIButton _esc;
+
+        private MeasureTool _measureTool;
         private NetTool _netTool;
 
-        //private UIPanel _controlPanel;
-        //private UIDragHandle _controlDragHandle;
-        //private UIPanel _controlInnerPanel;
-        //private UIButton[] _controlButtons;
+        private UIPanel _controlPanel;
+        private UIDragHandle _controlDragHandle;
+        private UIPanel _controlInnerPanel;
+        private UIButton _measureButton;
 
         private UIPanel _infoPanel;
         private UIDragHandle _infoDragHandle;
@@ -36,6 +38,11 @@ namespace MeasureIt
 
                     ModProperties.Instance.InfoPanelDefaultPositionX = ModProperties.Instance.ControlPanelDefaultPositionX + 70f;
                     ModProperties.Instance.InfoPanelDefaultPositionY = ModProperties.Instance.ControlPanelDefaultPositionY;
+                }
+
+                if (_measureTool == null)
+                {
+                    _measureTool = MeasureTool.Instance;
                 }
 
                 if (_netTool == null)
@@ -71,15 +78,13 @@ namespace MeasureIt
                     ModConfig.Instance.InfoPanelPositionY = ModProperties.Instance.InfoPanelDefaultPositionY;
                 }
 
-                if (_netTool != null)
+                if (_netTool != null && _measureTool != null)
                 {
-                    MeasureInfo.Instance.Initialize(_netTool);
+                    MeasureInfo.Instance.Initialize(_measureTool, _netTool);
                 }
 
-                //_controlButtons = new UIButton[2];
-
-                _infoTagLabels = new UILabel[6];
-                _infoValueLabels = new UILabel[6];
+                _infoTagLabels = new UILabel[7];
+                _infoValueLabels = new UILabel[7];
 
                 CreateUI();
             }
@@ -113,22 +118,22 @@ namespace MeasureIt
                 {
                     Destroy(_infoPanel);
                 }
-                //foreach (UIButton button in _controlButtons)
-                //{
-                //    Destroy(button);
-                //}
-                //if (_controlInnerPanel != null)
-                //{
-                //    Destroy(_controlInnerPanel);
-                //}
-                //if (_controlDragHandle != null)
-                //{
-                //    Destroy(_controlDragHandle);
-                //}
-                //if (_controlPanel != null)
-                //{
-                //    Destroy(_controlPanel);
-                //}
+                if (_measureButton != null)
+                {
+                    Destroy(_measureButton);
+                }
+                if (_controlInnerPanel != null)
+                {
+                    Destroy(_controlInnerPanel);
+                }
+                if (_controlDragHandle != null)
+                {
+                    Destroy(_controlDragHandle);
+                }
+                if (_controlPanel != null)
+                {
+                    Destroy(_controlPanel);
+                }
             }
             catch (Exception e)
             {
@@ -148,12 +153,8 @@ namespace MeasureIt
                     ModConfig.Instance.ConfigUpdated = false;
                 }
 
-                if (_netTool != null && _netTool.enabled && _netTool.m_mode != NetTool.Mode.Upgrade)
+                if ((_measureTool != null && _measureTool.enabled) || (_netTool != null && _netTool.enabled && _netTool.m_mode != NetTool.Mode.Upgrade))
                 {
-                    //if (!_controlPanel.isVisible && ModConfig.Instance.ShowControlPanel)
-                    //{
-                    //    _controlPanel.isVisible = true;
-                    //}
                     if (!_infoPanel.isVisible && ModConfig.Instance.ShowInfoPanel)
                     {
                         _infoPanel.isVisible = true;
@@ -164,7 +165,6 @@ namespace MeasureIt
                 }
                 else
                 {
-                    //_controlPanel.isVisible = false;
                     _infoPanel.isVisible = false;
                 }
             }
@@ -178,53 +178,56 @@ namespace MeasureIt
         {
             try
             {
-                //_controlPanel = UIUtils.CreatePanel("MeasureItControlPanel");
-                //_controlPanel.zOrder = 0;
-                //_controlPanel.backgroundSprite = "GenericPanelLight";
-                //_controlPanel.color = new Color32(96, 96, 96, 255);
-                //_controlPanel.size = new Vector2(62f, 98f);
-                //_controlPanel.isVisible = false;
+                _controlPanel = UIUtils.CreatePanel("MeasureItControlPanel");
+                _controlPanel.zOrder = 0;
+                _controlPanel.backgroundSprite = "GenericPanelLight";
+                _controlPanel.color = new Color32(96, 96, 96, 255);
+                _controlPanel.size = new Vector2(62f, 62f); //2 = 98f
+                _controlPanel.isVisible = false;
 
-                //_controlDragHandle = UIUtils.CreateDragHandle(_controlPanel, "ControlDragHandle");
-                //_controlDragHandle.size = new Vector2(_controlDragHandle.parent.width, _controlDragHandle.parent.height);
-                //_controlDragHandle.relativePosition = new Vector3(0f, 0f);
-                //_controlDragHandle.eventMouseUp += (component, eventParam) =>
-                //{
-                //    ModConfig.Instance.ControlPanelPositionX = _controlPanel.absolutePosition.x;
-                //    ModConfig.Instance.ControlPanelPositionY = _controlPanel.absolutePosition.y;
-                //    ModConfig.Instance.Save();
-                //};
+                _controlDragHandle = UIUtils.CreateDragHandle(_controlPanel, "ControlDragHandle");
+                _controlDragHandle.size = new Vector2(_controlDragHandle.parent.width, _controlDragHandle.parent.height);
+                _controlDragHandle.relativePosition = new Vector3(0f, 0f);
+                _controlDragHandle.eventMouseUp += (component, eventParam) =>
+                {
+                    ModConfig.Instance.ControlPanelPositionX = _controlPanel.absolutePosition.x;
+                    ModConfig.Instance.ControlPanelPositionY = _controlPanel.absolutePosition.y;
+                    ModConfig.Instance.Save();
+                };
 
-                //_controlInnerPanel = UIUtils.CreatePanel(_controlPanel, "ControlInnerPanel");
-                //_controlInnerPanel.backgroundSprite = "GenericPanelLight";
-                //_controlInnerPanel.color = new Color32(206, 206, 206, 255);
-                //_controlInnerPanel.size = new Vector2(_controlInnerPanel.parent.width - 16f, _controlInnerPanel.parent.height - 16f);
-                //_controlInnerPanel.relativePosition = new Vector3(8f, 8f);
+                _controlInnerPanel = UIUtils.CreatePanel(_controlPanel, "ControlInnerPanel");
+                _controlInnerPanel.backgroundSprite = "GenericPanelLight";
+                _controlInnerPanel.color = new Color32(206, 206, 206, 255);
+                _controlInnerPanel.size = new Vector2(_controlInnerPanel.parent.width - 16f, _controlInnerPanel.parent.height - 16f);
+                _controlInnerPanel.relativePosition = new Vector3(8f, 8f);
 
-                //for (int i = 0; i < 2; i++)
-                //{
-                //    UIButton button = UIUtils.CreateButton(_controlInnerPanel, "Control" + (i + 1), (i + 1).ToString());
-                //    button.objectUserData = i;
-                //    button.tooltip = "Unavailable";
-                //    button.relativePosition = new Vector3(5f, 5f + i * 36f);
-                //    button.eventClick += (component, eventParam) =>
-                //    {
-                //        if (!eventParam.used)
-                //        {
+                _measureButton = UIUtils.CreateButton(_controlInnerPanel, "MeasureButton", "M");
+                _measureButton.tooltip = "Measure between two points anywhere on map";
+                _measureButton.relativePosition = new Vector3(5f, 5f);
+                _measureButton.eventClick += (component, eventParam) =>
+                {
+                    if (!eventParam.used)
+                    {
+                        if (_measureTool.enabled)
+                        {
+                            _measureButton.normalBgSprite = "OptionBase";
+                            ToolsModifierControl.SetTool<DefaultTool>();
+                        }
+                        else
+                        {
+                            _measureButton.normalBgSprite = "OptionBaseFocused";
+                            _measureTool.enabled = true;
+                        }
 
-
-                //            eventParam.Use();
-                //        }
-                //    };
-
-                //    _controlButtons[i] = button;
-                //}
+                        eventParam.Use();
+                    }
+                };
 
                 _infoPanel = UIUtils.CreatePanel("MeasureItInfoPanel");
                 _infoPanel.zOrder = 0;
                 _infoPanel.backgroundSprite = "GenericPanelLight";
                 _infoPanel.color = new Color32(96, 96, 96, 255);
-                _infoPanel.size = new Vector2(190f, 136f);
+                _infoPanel.size = new Vector2(190f, 152f);
                 _infoPanel.isVisible = false;
 
                 _infoDragHandle = UIUtils.CreateDragHandle(_infoPanel, "InfoDragHandle");
@@ -243,7 +246,7 @@ namespace MeasureIt
                 _infoInnerPanel.size = new Vector2(_infoInnerPanel.parent.width - 16f, _infoInnerPanel.parent.height - 16f);
                 _infoInnerPanel.relativePosition = new Vector3(8f, 8f);
 
-                for (int i = 0; i < 6; i++)
+                for (int i = 0; i < 7; i++)
                 {
                     _infoTagLabels[i] = UIUtils.CreateLabel(_infoInnerPanel, "InfoTagLabel" + i, "");
                     _infoTagLabels[i].textScale = 0.625f;
@@ -266,13 +269,13 @@ namespace MeasureIt
         {
             try
             {
-                //_controlPanel.absolutePosition = new Vector3(ModConfig.Instance.ControlPanelPositionX, ModConfig.Instance.ControlPanelPositionY);
-                //_controlPanel.isVisible = ModConfig.Instance.ShowControlPanel;
+                _controlPanel.absolutePosition = new Vector3(ModConfig.Instance.ControlPanelPositionX, ModConfig.Instance.ControlPanelPositionY);
+                _controlPanel.isVisible = ModConfig.Instance.ShowControlPanel;
 
                 _infoPanel.absolutePosition = new Vector3(ModConfig.Instance.InfoPanelPositionX, ModConfig.Instance.InfoPanelPositionY);
                 _infoPanel.isVisible = ModConfig.Instance.ShowInfoPanel;
 
-                for (int i = 0; i < 6; i++)
+                for (int i = 0; i < 7; i++)
                 {
                     switch (i)
                     {
@@ -286,19 +289,23 @@ namespace MeasureIt
                             break;
                         case 2:
                             _infoTagLabels[i].text = "Length (" + GetUnitOfDistanceSymbol(ModConfig.Instance.UnitOfDistance) + ")";
-                            _infoTagLabels[i].tooltip = "Length is the flat distance between start (and middle) and end point.";
+                            _infoTagLabels[i].tooltip = "Length is the flat distance between start and end point.";
                             break;
                         case 3:
                             _infoTagLabels[i].text = "Distance (" + GetUnitOfDistanceSymbol(ModConfig.Instance.UnitOfDistance) + ")";
-                            _infoTagLabels[i].tooltip = "Distance is the straigt distance between start (and middle) and end point.";
+                            _infoTagLabels[i].tooltip = "Distance is the straigt distance between start and end point.";
                             break;
                         case 4:
+                            _infoTagLabels[i].text = "Curvature (" + GetUnitOfDistanceSymbol(ModConfig.Instance.UnitOfDistance) + ")";
+                            _infoTagLabels[i].tooltip = "Curvature is the extrinsic curvature between start and end point.";
+                            break;
+                        case 5:
                             _infoTagLabels[i].text = "Slope (" + GetUnitOfSlopeSymbol(ModConfig.Instance.UnitOfSlope) + ")";
                             _infoTagLabels[i].tooltip = "Slope is the average incline between start and end point.";
                             break;
-                        case 5:
+                        case 6:
                             _infoTagLabels[i].text = "Direction (" + GetUnitOfDirectionSymbol(ModConfig.Instance.UnitOfDirection) + ")";
-                            _infoTagLabels[i].tooltip = "Direction is the cartographic orientation between start or middle and end point.";
+                            _infoTagLabels[i].tooltip = "Direction is the cartographic orientation for end point.";
                             break;
                         default:
                             break;
@@ -315,7 +322,7 @@ namespace MeasureIt
         {
             try
             {
-                for (int i = 0; i < 6; i++)
+                for (int i = 0; i < 7; i++)
                 {
                     switch (i)
                     {
@@ -332,9 +339,12 @@ namespace MeasureIt
                             _infoValueLabels[i].text = DisplayDistance(ModConfig.Instance.UnitOfDistance, MeasureInfo.Instance.Distance);
                             break;
                         case 4:
-                            _infoValueLabels[i].text = DisplaySlope(ModConfig.Instance.UnitOfSlope, MeasureInfo.Instance.Slope);
+                            _infoValueLabels[i].text = DisplayDistance(ModConfig.Instance.UnitOfDistance, MeasureInfo.Instance.Curvature);
                             break;
                         case 5:
+                            _infoValueLabels[i].text = DisplaySlope(ModConfig.Instance.UnitOfSlope, MeasureInfo.Instance.Slope);
+                            break;
+                        case 6:
                             _infoValueLabels[i].text = DisplayDirection(ModConfig.Instance.UnitOfDirection, MeasureInfo.Instance.Direction);
                             break;
                         default:
@@ -422,7 +432,7 @@ namespace MeasureIt
                 switch (unitOfDistance)
                 {
                     case 0:
-                        return distance;
+                        return distance / 8f;
                     case 1:
                         return distance;
                     case 2:
@@ -460,7 +470,7 @@ namespace MeasureIt
                 switch (unitOfSlope)
                 {
                     case 0:
-                        return (float)(Math.Atan(slope) * (180 / Math.PI));
+                        return Mathf.Atan(slope) * 180 / (float)Math.PI;
                     case 1:
                         return slope * 100;
                     default:
@@ -496,7 +506,7 @@ namespace MeasureIt
                     case 0:
                         return $"{direction:0.##}";
                     case 1:
-                        return CARDINALS[(int)Math.Round(direction % 360 / 45)];
+                        return CARDINALS[(int)Mathf.Round(direction % 360 / 45)];
                     default:
                         return $"{direction:0.##}";
                 }
