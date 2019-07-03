@@ -12,7 +12,7 @@ namespace MeasureIt
         public float Relief;
         public float Length;
         public float Distance;
-        public float Curvature;
+        public float Radius;
         public float Slope;
         public float Direction;
 
@@ -85,7 +85,7 @@ namespace MeasureIt
                     Relief = pointCount > 0 ? _endHeight - _startHeight : 0f;
                     Length = pointCount > 0 ? Length : 0f;
                     Distance = pointCount > 0 ? Distance : 0f;
-                    Curvature = 0f;
+                    Radius = 0f;
                     Slope = pointCount > 0 ? (Length > 0f ? Relief / Length : 0f) : 0f;
                     Direction = pointCount > 0 ? Direction : 0f;
                 }
@@ -109,7 +109,7 @@ namespace MeasureIt
                         _endHeight = _terrainManager.SampleRawHeightSmooth(_controlPoints[1].m_position) + _controlPoints[1].m_elevation;
                         Length = VectorUtils.LengthXZ(_endPosition - _startPosition);
                         Distance = Vector3.Distance(_endPosition, _startPosition);
-                        Curvature = 0f;
+                        Radius = 0f;
                         Direction = CalculateAngle(Vector3.down, VectorUtils.XZ(_endPosition - _startPosition));
                     }
                     else if (controlPointCount == 2)
@@ -117,17 +117,17 @@ namespace MeasureIt
                         _bendPosition = _controlPoints[1].m_position;
                         _endPosition = _controlPoints[2].m_position;
                         _endHeight = _terrainManager.SampleRawHeightSmooth(_controlPoints[2].m_position) + _controlPoints[2].m_elevation;
-                        CalculateMiddlePoints(_startPosition, _bendPosition, _endPosition, out Vector3 middle1Position, out Vector3 middle2Position);
-                        Length = CalculateLength(_startPosition, middle1Position, middle2Position, _endPosition);
-                        Distance = CalculateDistance(_startPosition, middle1Position, middle2Position, _endPosition);
-                        Curvature = CalculateCurvature(_startPosition, _bendPosition, _endPosition);
+                        CalculateMiddlePoints(_startPosition, _bendPosition, _endPosition, out Vector3 middle1Position, out Vector3 middle2Position, out Vector3 middle3Position);
+                        Length = CalculateLength(_startPosition, middle1Position, middle2Position, middle3Position, _endPosition);
+                        Distance = CalculateDistance(_startPosition, middle1Position, middle2Position, middle3Position, _endPosition);
+                        Radius = CalculateRadius(_startPosition, middle2Position, _endPosition);
                         Direction = CalculateAngle(Vector3.down, VectorUtils.XZ(_endPosition - _bendPosition));
                     }
 
                     Relief = controlPointCount > 0 ? _endHeight - _startHeight : 0f;
                     Length = controlPointCount > 0 ? Length : 0f;
                     Distance = controlPointCount > 0 ? Distance : 0f;
-                    Curvature = controlPointCount > 0 ? Curvature : 0f;
+                    Radius = controlPointCount > 0 ? Radius : 0f;
                     Slope = controlPointCount > 0 ? (Length > 0f ? Relief / Length : 0f) : 0f;
                     Direction = controlPointCount > 0 ? Direction : 0f;
                 }
@@ -138,42 +138,53 @@ namespace MeasureIt
             }
         }
 
-        private void CalculateMiddlePoints(Vector3 start, Vector3 bend, Vector3 end, out Vector3 middle1Position, out Vector3 middle2Position)
+        private void CalculateMiddlePoints(Vector3 start, Vector3 bend, Vector3 end, out Vector3 middle1Position, out Vector3 middle2Position, out Vector3 middle3Position)
         {
-            middle1Position = Vector3.Lerp(Vector3.Lerp(start, bend, 0.3f),
-                                           Vector3.Lerp(bend, end, 0.3f),
-                                           0.3f);
+            middle1Position = Vector3.Lerp(Vector3.Lerp(start, bend, 0.25f),
+                                           Vector3.Lerp(bend, end, 0.25f),
+                                           0.25f);
 
-            middle2Position = Vector3.Lerp(Vector3.Lerp(start, bend, 0.6f),
-                                           Vector3.Lerp(bend, end, 0.6f),
-                                           0.6f);
+            middle2Position = Vector3.Lerp(Vector3.Lerp(start, bend, 0.5f),
+                                           Vector3.Lerp(bend, end, 0.5f),
+                                           0.5f);
+
+            middle3Position = Vector3.Lerp(Vector3.Lerp(start, bend, 0.75f),
+                                           Vector3.Lerp(bend, end, 0.75f),
+                                           0.75f);
         }
 
-        private float CalculateLength(Vector3 start, Vector3 middle1, Vector3 middle2, Vector3 end)
+        private float CalculateLength(Vector3 start, Vector3 middle1, Vector3 middle2, Vector3 middle3, Vector3 end)
         {
             float distance = 0f;
 
             distance += VectorUtils.LengthXZ(middle1 - start);
             distance += VectorUtils.LengthXZ(middle2 - middle1);
-            distance += VectorUtils.LengthXZ(end - middle2);
+            distance += VectorUtils.LengthXZ(middle3 - middle2);
+            distance += VectorUtils.LengthXZ(end - middle3);
 
             return distance;
         }
 
-        private float CalculateDistance(Vector3 start, Vector3 middle1, Vector3 middle2, Vector3 end)
+        private float CalculateDistance(Vector3 start, Vector3 middle1, Vector3 middle2, Vector3 middle3, Vector3 end)
         {
             float length = 0f;
 
             length += Vector3.Distance(start, middle1);
             length += Vector3.Distance(middle1, middle2);
-            length += Vector3.Distance(middle2, end);
+            length += Vector3.Distance(middle2, middle3);
+            length += Vector3.Distance(middle3, end);
 
             return length;
         }
 
-        private float CalculateCurvature(Vector3 start, Vector3 bend, Vector3 end)
+        private float CalculateRadius(Vector3 start, Vector3 middle, Vector3 end)
         {
-            return 0f;
+            float area = Triangle3.Area(start, middle, end);
+            float sideLength1 = Vector3.Distance(start, middle);
+            float sideLength2 = Vector3.Distance(middle, end);
+            float sideLength3 = Vector3.Distance(end, start);
+
+            return 1 / (4 * area / (sideLength1 * sideLength2 * sideLength3));
         }
 
         private float CalculateAngle(Vector3 from, Vector3 to)

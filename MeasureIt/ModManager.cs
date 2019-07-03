@@ -296,8 +296,8 @@ namespace MeasureIt
                             _infoTagLabels[i].tooltip = "Distance is the straigt distance between start and end point.";
                             break;
                         case 4:
-                            _infoTagLabels[i].text = "Curvature (" + GetUnitOfDistanceSymbol(ModConfig.Instance.UnitOfDistance) + ")";
-                            _infoTagLabels[i].tooltip = "Curvature is the extrinsic curvature between start and end point.";
+                            _infoTagLabels[i].text = "Radius (" + GetUnitOfDistanceSymbol(ModConfig.Instance.UnitOfDistance) + ")";
+                            _infoTagLabels[i].tooltip = "Radius is the reciprocal of the extrinsic curvature between start and end point.";
                             break;
                         case 5:
                             _infoTagLabels[i].text = "Slope (" + GetUnitOfSlopeSymbol(ModConfig.Instance.UnitOfSlope) + ")";
@@ -339,7 +339,7 @@ namespace MeasureIt
                             _infoValueLabels[i].text = DisplayDistance(ModConfig.Instance.UnitOfDistance, MeasureInfo.Instance.Distance);
                             break;
                         case 4:
-                            _infoValueLabels[i].text = DisplayDistance(ModConfig.Instance.UnitOfDistance, MeasureInfo.Instance.Curvature);
+                            _infoValueLabels[i].text = DisplayDistance(ModConfig.Instance.UnitOfDistance, MeasureInfo.Instance.Radius);
                             break;
                         case 5:
                             _infoValueLabels[i].text = DisplaySlope(ModConfig.Instance.UnitOfSlope, MeasureInfo.Instance.Slope);
