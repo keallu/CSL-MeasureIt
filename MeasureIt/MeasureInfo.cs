@@ -26,7 +26,7 @@ namespace MeasureIt
         private NetTool.ControlPoint[] _controlPoints;
 
         private Vector3 _startPosition;
-        private Vector3 _bendPosition;
+        private Vector3 _controlPosition;
         private Vector3 _endPosition;
         private float _startHeight;
         private float _endHeight;
@@ -114,14 +114,14 @@ namespace MeasureIt
                     }
                     else if (controlPointCount == 2)
                     {
-                        _bendPosition = _controlPoints[1].m_position;
+                        _controlPosition = _controlPoints[1].m_position;
                         _endPosition = _controlPoints[2].m_position;
                         _endHeight = _terrainManager.SampleRawHeightSmooth(_controlPoints[2].m_position) + _controlPoints[2].m_elevation;
-                        CalculateMiddlePoints(_startPosition, _bendPosition, _endPosition, out Vector3 middle1Position, out Vector3 middle2Position, out Vector3 middle3Position);
+                        CalculateMiddlePoints(_startPosition, _controlPosition, _endPosition, out Vector3 middle1Position, out Vector3 middle2Position, out Vector3 middle3Position);
                         Length = CalculateLength(_startPosition, middle1Position, middle2Position, middle3Position, _endPosition);
                         Distance = CalculateDistance(_startPosition, middle1Position, middle2Position, middle3Position, _endPosition);
-                        Radius = CalculateRadius(_startPosition, middle2Position, _endPosition);
-                        Direction = CalculateAngle(Vector3.down, VectorUtils.XZ(_endPosition - _bendPosition));
+                        Radius = CalculateRadius(_startPosition, middle2Position, _endPosition, _controlPosition);
+                        Direction = CalculateAngle(Vector3.down, VectorUtils.XZ(_endPosition - _controlPosition));
                     }
 
                     Relief = controlPointCount > 0 ? _endHeight - _startHeight : 0f;
@@ -177,14 +177,28 @@ namespace MeasureIt
             return length;
         }
 
-        private float CalculateRadius(Vector3 start, Vector3 middle, Vector3 end)
+        private float CalculateRadius(Vector3 start, Vector3 middle, Vector3 end, Vector3 control)
         {
-            float area = Triangle3.Area(start, middle, end);
-            float sideLength1 = Vector3.Distance(start, middle);
-            float sideLength2 = Vector3.Distance(middle, end);
-            float sideLength3 = Vector3.Distance(end, start);
+            float radius;
 
-            return 1 / (4 * area / (sideLength1 * sideLength2 * sideLength3));
+            float tangent1 = VectorUtils.LengthXZ(control - start);
+            float tangent2 = VectorUtils.LengthXZ(control - end);
+
+            if (Mathf.Abs(tangent1 - tangent2) <= Mathf.Abs(tangent1 * .0001f))
+            {
+                radius = tangent1;
+            }
+            else
+            {
+                float area = Triangle3.Area(start, middle, end);
+                float sideLength1 = Vector3.Distance(start, middle);
+                float sideLength2 = Vector3.Distance(middle, end);
+                float sideLength3 = Vector3.Distance(end, start);
+
+                radius = 1 / (4 * area / (sideLength1 * sideLength2 * sideLength3));
+            }
+
+            return radius;
         }
 
         private float CalculateAngle(Vector3 from, Vector3 to)
